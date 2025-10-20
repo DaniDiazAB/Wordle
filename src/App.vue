@@ -1,30 +1,67 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+import Bienvenida from './components/Bienvenida.vue'
+import InputLetra from './components/InputLetra.vue'
+import BtnProbarSuerte from './components/BtnProbarSuerte.vue'
+import { usePalabraAdivinarStore } from './stores/palabra';
+
+const palabraAAdivinar = usePalabraAdivinarStore();
+
+console.log(palabraAAdivinar.randomWord)
+
+const arraySize = ref(0)
+let palabraCompleta = true
+let vidas = ref(6)
+
+const emit = defineEmits(['enviarPalabra'])
+
+let palabraUsuario = ref("")
+function probarSuerte() {
+  palabraCompleta = true
+  const inputs = document.getElementsByClassName("input-letra") as HTMLCollectionOf<HTMLInputElement>;
+  
+  let palabraUsuarioAdivinar = ""
+
+  for (let i = 0; i < inputs.length; i++) {
+    palabraUsuarioAdivinar = palabraUsuarioAdivinar + inputs[i]?.value
+    if (inputs[i]?.value === ""){
+      palabraCompleta = false
+    }
+  }
+
+  if (palabraCompleta){
+    palabraUsuario.value = palabraUsuarioAdivinar
+    comprobarPalabra(palabraUsuario.value)
+  }else{
+    console.log("Por favor, rellene todos los espacios")
+  }
+}
+
+function comprobarPalabra(palabraUsuarioEscrita: string){
+  console.log('Palabra escrita por el usuario:', palabraUsuarioEscrita)
+
+  if (palabraUsuarioEscrita.toLowerCase() == palabraAAdivinar.randomWord?.toLowerCase()){
+   
+    
+    console.log("ACERTADO")
+  }else{
+    console.log("FALLADO")
+
+  }
+
+  
+}
+
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <Bienvenida />
+
+  <div class="div-intento" >
+    <InputLetra />
   </div>
-  <HelloWorld msg="Vite + Vue" />
+
+  <BtnProbarSuerte @click="probarSuerte" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>
