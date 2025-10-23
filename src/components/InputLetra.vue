@@ -3,8 +3,6 @@ import { ref, onMounted } from 'vue'
 import { usePalabraAdivinarStore } from '../stores/palabra';
 
 const espaciosRellenar = usePalabraAdivinarStore().randomWord?.length;
-
-
 const letras = ref<string[]>(Array(espaciosRellenar).fill('')) 
 
 const handleInput = (index: number, event: Event) => {
