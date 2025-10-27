@@ -14,8 +14,9 @@ let intentos = ref(5)
 let fallidos = ref(0)
 
 const emit = defineEmits(['enviarPalabra'])
-const intentosFallidos = ref<string[]>([]) // guarda los intentos fallidos
+const intentosFallidos = ref<string[]>([]) 
 
+const resetKey = ref(0)
 
 let palabraUsuario = ref("")
 function probarSuerte() {
@@ -39,6 +40,8 @@ function probarSuerte() {
   if (palabraCompleta) {
     palabraUsuario.value = palabraUsuarioAdivinar;
     comprobarPalabra(palabraUsuario.value);
+    
+    resetKey.value += 1
   } else {
     console.log("Por favor, rellene todos los espacios");
   }
@@ -47,26 +50,9 @@ function probarSuerte() {
 
 
 function comprobarPalabra(palabraUsuarioEscrita: string) {
-  let palabraMedias = ""
-
-
   if (palabraUsuarioEscrita.toLowerCase() == palabraAAdivinar.randomWord?.toLowerCase()) {
     alert("Palabra acertada")
   } else {
-    console.log("FALLADO")
-    const letrasAdivinar = palabraAAdivinar.randomWord
-      ? palabraAAdivinar.randomWord.toLocaleUpperCase().split("")
-      : []
-    const letrasIntentada = palabraUsuarioEscrita.split("")
-
-    for (let i = 0; i < palabraUsuarioEscrita.length; i++) {
-      if (letrasAdivinar[i] === letrasIntentada[i]) {
-        palabraMedias += letrasAdivinar[i]
-      } else {
-        palabraMedias += "_"
-      }
-    }
-
     intentosFallidos.value.push(palabraUsuarioEscrita)
   }
 }
@@ -85,15 +71,14 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
     />
   </div>
 
-  <div class="div-intento">
+  <div class="div-intento" :key="resetKey">
     <InputLetra />
   </div>
 
 
   <div class="div-restantes" v-for="i in intentos" :key="i">
-    <InputLetra />
+    <InputLetra :key="`${i}-${resetKey}`" />
   </div>
-
 
   <BtnProbarSuerte @click="probarSuerte" />
 </template>
@@ -123,7 +108,5 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
   align-items: center;
   justify-content: center;
 }
-
-
 
 </style>
