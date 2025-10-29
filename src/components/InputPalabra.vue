@@ -14,25 +14,26 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+
+
 interface Props {
-  palabra: string          // palabra escrita por el usuario
-  palabraAdivinar: string  // palabra que se intenta adivinar
+  palabra: string          
+  palabraAdivinar: string 
 }
 
 const props = defineProps<Props>()
 
 const letras = computed(() => props.palabra.toUpperCase().split(''))
 
-// Función que devuelve una clase según si la letra es correcta o no
 function getClaseLetra(letra: string, index: number) {
   const palabraObjetivo = props.palabraAdivinar.toUpperCase()
 
   if (palabraObjetivo[index] === letra) {
-    return 'correcta' // verde
+    return 'correcta' 
   } else if (palabraObjetivo.includes(letra)) {
-    return 'parcial' // amarilla
+    return 'parcial' 
   } else {
-    return 'incorrecta' // gris/roja
+    return 'incorrecta'
   }
 }
 </script>

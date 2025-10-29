@@ -1,24 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import Bienvenida from './components/Bienvenida.vue'
 import InputLetra from './components/InputLetra.vue'
 import BtnProbarSuerte from './components/BtnProbarSuerte.vue'
 import InputPalabra from './components/InputPalabra.vue'
 import { usePalabraAdivinarStore } from './stores/palabra';
 
-const palabraAAdivinar = usePalabraAdivinarStore();
-console.log(palabraAAdivinar.randomWord)
+
 
 let palabraCompleta = true
 let intentos = ref(5)
 let fallidos = ref(0)
-
-const emit = defineEmits(['enviarPalabra'])
-const intentosFallidos = ref<string[]>([]) 
-
-const resetKey = ref(0)
-
 let palabraUsuario = ref("")
+const palabraAAdivinar = usePalabraAdivinarStore();
+const emit = defineEmits(['enviarPalabra'])
+const intentosFallidos = ref<string[]>([])
+const resetKey = ref(0)
+const appReady = ref(false);
+
+onMounted(() => {
+  const checkWord = setInterval(() => {
+    if (palabraAAdivinar.randomWord) {
+      console.log(palabraAAdivinar.randomWord);
+      appReady.value = true;
+      clearInterval(checkWord);
+    }
+  }, 100);
+});
+
 function probarSuerte() {
   intentos.value = intentos.value - 1;
   fallidos.value = fallidos.value + 1;
@@ -40,14 +49,12 @@ function probarSuerte() {
   if (palabraCompleta) {
     palabraUsuario.value = palabraUsuarioAdivinar;
     comprobarPalabra(palabraUsuario.value);
-    
+
     resetKey.value += 1
   } else {
     console.log("Por favor, rellene todos los espacios");
   }
-  
 }
-
 
 function comprobarPalabra(palabraUsuarioEscrita: string) {
   if (palabraUsuarioEscrita.toLowerCase() == palabraAAdivinar.randomWord?.toLowerCase()) {
@@ -62,30 +69,47 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
 <template>
   <Bienvenida />
 
-  <div class="div-fallidos">
-    <InputPalabra
-      v-for="(intento, index) in intentosFallidos"
-      :key="index"
-      :palabra="intento"
-       :palabraAdivinar="palabraAAdivinar.randomWord || ''"
-    />
+  <div v-if="!appReady" class="loading">
+    <p>Cargando palabra...</p>
   </div>
 
-  <div class="div-intento" :key="resetKey">
-    <InputLetra />
+  <div v-else>
+
+    <div class="div-fallidos">
+      <InputPalabra v-for="(intento, index) in intentosFallidos" :key="index" :palabra="intento"
+        :palabraAdivinar="palabraAAdivinar.randomWord || ''" />
+    </div>
+
+    <div class="div-intento" :key="resetKey">
+      <InputLetra />
+    </div>
+
+    
+    <div class="div-restantes" v-for="i in intentos" :key="i">
+      <InputLetra :key="`${i}-${resetKey}`" />
+    </div>
+
+    <BtnProbarSuerte @click="probarSuerte" />
   </div>
-
-
-  <div class="div-restantes" v-for="i in intentos" :key="i">
-    <InputLetra :key="`${i}-${resetKey}`" />
-  </div>
-
-  <BtnProbarSuerte @click="probarSuerte" />
 </template>
 
 
 
 <style scoped>
+
+.div-restantes :deep(.input-letra) {
+  background-color: grey !important;
+  color: black !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  border-color: #e0e0e0 !important;
+}
+
+.div-restantes .input-letra {
+  user-select: none;
+  pointer-events: none;
+}
+
 .intento-fallido {
   display: flex;
   gap: 10px;
@@ -108,5 +132,4 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
   align-items: center;
   justify-content: center;
 }
-
 </style>
