@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { usePalabraAdivinarStore } from '../stores/palabra';
 
 const espaciosRellenar = usePalabraAdivinarStore().randomWord?.length;
@@ -32,7 +32,7 @@ const handleKeydown = (index: number, event: KeyboardEvent) => {
 <template>
   <div>
     <input
-      v-for="(letra, i) in letras"
+      v-for="(_, i) in letras"
       :key="i"
       class="input-letra"
       v-model="letras[i]"

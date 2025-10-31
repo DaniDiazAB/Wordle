@@ -23,9 +23,10 @@ watch(
 );
 
 function obtenerLetra(letra: string) {
-  return Array.from(pLetras).find(p => p.textContent.trim() === letra.toUpperCase());
+  return Array.from(pLetras).find(p => 
+    p.textContent?.trim() === letra.toUpperCase()
+  );
 }
-
 
 
 </script>
