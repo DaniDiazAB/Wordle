@@ -1,20 +1,5 @@
-<template>
-  <div class="palabra">
-    <div
-      v-for="(letra, index) in letras"
-      :key="index"
-      class="letra"
-      :class="getClaseLetra(letra, index)"
-    >
-      {{ letra }}
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
-
-
 
 interface Props {
   palabra: string          
@@ -37,6 +22,19 @@ function getClaseLetra(letra: string, index: number) {
   }
 }
 </script>
+
+<template>
+  <div class="palabra">
+    <div
+      v-for="(letra, index) in letras"
+      :key="index"
+      class="letra"
+      :class="getClaseLetra(letra, index)"
+    >
+      {{ letra }}
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .palabra {

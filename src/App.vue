@@ -5,8 +5,7 @@ import InputLetra from './components/InputLetra.vue'
 import BtnProbarSuerte from './components/BtnProbarSuerte.vue'
 import InputPalabra from './components/InputPalabra.vue'
 import { usePalabraAdivinarStore } from './stores/palabra';
-
-
+import Teclado from './components/Teclado.vue'
 
 let palabraCompleta = true
 let intentos = ref(5)
@@ -17,6 +16,9 @@ const emit = defineEmits(['enviarPalabra'])
 const intentosFallidos = ref<string[]>([])
 const resetKey = ref(0)
 const appReady = ref(false);
+const palabraAcertada = ref(false)
+const letrasUsadas = ref<string[]>([])
+
 
 onMounted(() => {
   const checkWord = setInterval(() => {
@@ -40,17 +42,26 @@ function probarSuerte() {
   let palabraUsuarioAdivinar = "";
 
   for (let i = 0; i < inputs.length; i++) {
-    palabraUsuarioAdivinar += inputs[i]?.value;
-    if (inputs[i]?.value === "") {
+    const letraActual = inputs[i]?.value || '';
+    palabraUsuarioAdivinar += letraActual;
+    
+    if (letraActual === "") {
       palabraCompleta = false;
+    } else {
+      if (!letrasUsadas.value.includes(letraActual)) {
+        letrasUsadas.value.push(letraActual);
+      }
     }
   }
 
   if (palabraCompleta) {
     palabraUsuario.value = palabraUsuarioAdivinar;
-    comprobarPalabra(palabraUsuario.value);
-
-    resetKey.value += 1
+    comprobarPalabra(palabraUsuario.value);    
+    resetKey.value += 1;
+    setTimeout(() => {
+      const nextInput = document.querySelector<HTMLInputElement>('.input-letra');
+      nextInput?.focus();
+    }, 0);
   } else {
     console.log("Por favor, rellene todos los espacios");
   }
@@ -58,7 +69,7 @@ function probarSuerte() {
 
 function comprobarPalabra(palabraUsuarioEscrita: string) {
   if (palabraUsuarioEscrita.toLowerCase() == palabraAAdivinar.randomWord?.toLowerCase()) {
-    alert("Palabra acertada")
+    palabraAcertada.value = true
   } else {
     intentosFallidos.value.push(palabraUsuarioEscrita)
   }
@@ -72,6 +83,12 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
   <div v-if="!appReady" class="loading">
     <p>Cargando palabra...</p>
   </div>
+
+  <div v-else-if="palabraAcertada" class="acertado">
+    <h2>🎉 ¡Palabra acertada!</h2>
+    <p>La palabra era: {{ palabraAAdivinar.randomWord }}</p>
+  </div>
+  
 
   <div v-else>
 
@@ -89,7 +106,9 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
       <InputLetra :key="`${i}-${resetKey}`" />
     </div>
 
-    <BtnProbarSuerte @click="probarSuerte" />
+    <BtnProbarSuerte @click="probarSuerte" :key="resetKey"/>
+
+    <Teclado :letrasUsadas="letrasUsadas"/>
   </div>
 </template>
 
