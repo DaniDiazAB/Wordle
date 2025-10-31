@@ -1,4 +1,4 @@
-# 🟩 Wordle v0.1 — Proyecto en Vue 3.5.22
+# 🟩 Wordle v0.2 — Proyecto en Vue 3.5.22
 
 Este es un proyecto personal desarrollado con **Vue.js v3.5.22**, inspirado en el clásico juego **Wordle**.  
 El objetivo principal ha sido **aprender y practicar el funcionamiento interno de Vue**, sus componentes, reactividad y comunicación entre ellos.
@@ -7,7 +7,7 @@ El objetivo principal ha sido **aprender y practicar el funcionamiento interno d
 
 ## 🚀 Descripción general
 
-En esta primera versión (v0.1) el juego es totalmente funcional:  
+En esta primera versión (v0.2) el juego es totalmente funcional:  
 puedes escribir una palabra, probar suerte e ir viendo tus intentos previos con colores que indican si las letras son correctas o no.
 
 > ⚙️ Este proyecto **no busca ser un clon comercial**, sino un **proyecto educativo** para entender el ciclo de vida y el flujo de datos en Vue 3.
@@ -32,7 +32,7 @@ En el futuro se añadirá una **demostración en vivo (LIVE DEMO)** accesible p�
 
 ---
 
-## 🧩 Funcionalidades actuales (v0.1)
+## 🧩 Funcionalidades actuales (v0.2)
 
 - Juego base completamente funcional.
 - Control de intentos fallidos y visualización de palabras anteriores.
@@ -43,22 +43,18 @@ En el futuro se añadirá una **demostración en vivo (LIVE DEMO)** accesible p�
 - Reinicio de los inputs al probar suerte.
 - Estructura de componentes reutilizables (`InputLetra`, `InputPalabra`, `BtnProbarSuerte`, etc.).
 - Uso de Pinia para almacenar la palabra a adivinar.
+- Teclado con las letras usadas
 
 ---
 
-## 🔮 Próximas mejoras (v0.2)
+## 🔮 Próximas mejoras (v1.0)
 
 Estas son las funcionalidades planificadas para la versión **v0.2**:
 
 - 🎨 **Mejoras visuales** y ajustes generales en el CSS.  
-- 🅰️ **Ignorar tildes** (e.g. “Á” = “A”).  
-- 🌐 **Llamada a una API** para obtener una palabra aleatoria.  
+- 🌐 **Crear una API propia en español** para obtener una palabra aleatoria.  
 - 📖 **Verificación de palabras reales**: antes de comprobar, se validará que la palabra exista en el diccionario.  
-- ✏️ **Entrada continua**: al pulsar “Probar suerte”, el foco se moverá automáticamente al input activo.  
-- 🔒 **Restricción de inputs**: solo se podrá escribir en el intento actual.  
-- ⌨️ **Teclado visual** que muestre letras usadas y su estado (correcta/parcial/incorrecta).  
-- 🏆 **Mejor feedback al acertar** la palabra (animaciones o mensajes).
-
+- ✏️ **Mejoras en el teclado**: se podrá ver que letras están y cuales no, además de que se podrá escribir letras pulsando en sobre ellas
 ---
 
 ## 🧰 Instalación y uso libre
@@ -68,5 +64,5 @@ Para instalarlo en tu propia máquina o página web:
 
 ### 1️⃣ Clona el repositorio
 ```bash
-git clone https://github.com/tu-usuario/wordle-vue.git
+git clone https://github.com/DaniDiazAB/wordle.git
 cd wordle-vue
