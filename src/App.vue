@@ -6,6 +6,7 @@ import BtnProbarSuerte from './components/BtnProbarSuerte.vue'
 import InputPalabra from './components/InputPalabra.vue'
 import { usePalabraAdivinarStore } from './stores/palabra';
 import Teclado from './components/Teclado.vue'
+import BtnVolverJugar from './components/BtnVolverJugar.vue'
 
 let palabraCompleta = true
 let intentos = ref(5)
@@ -18,6 +19,8 @@ const resetKey = ref(0)
 const appReady = ref(false);
 const palabraAcertada = ref(false)
 const letrasUsadas = ref<string[]>([])
+
+const vidas = ref(6)
 
 
 onMounted(() => {
@@ -61,6 +64,7 @@ function probarSuerte() {
     setTimeout(() => {
       const nextInput = document.querySelector<HTMLInputElement>('.input-letra');
       nextInput?.focus();
+      vidas.value--;
     }, 0);
   } else {
     console.log("Por favor, rellene todos los espacios");
@@ -70,9 +74,14 @@ function probarSuerte() {
 function comprobarPalabra(palabraUsuarioEscrita: string) {
   if (palabraUsuarioEscrita.toLowerCase() == palabraAAdivinar.randomWord?.toLowerCase()) {
     palabraAcertada.value = true
+    vidas.value = 0
   } else {
     intentosFallidos.value.push(palabraUsuarioEscrita)
   }
+}
+
+function volverAJugar(){
+  window.location.reload();
 }
 
 </script>
@@ -84,11 +93,22 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
     <p>Cargando palabra...</p>
   </div>
 
-  <div v-else-if="palabraAcertada" class="acertado">
-    <h2>🎉 ¡Palabra acertada!</h2>
+
+  <div v-else-if="palabraAcertada || vidas === 0" class="acertado">
+
+
+    <h2 v-if="vidas != 0">🎉 ¡Palabra acertada!</h2>
+    <h2 v-else> Palabra fallada... :( </h2>
+
+
+
     <p>La palabra era: {{ palabraAAdivinar.randomWord }}</p>
+
+    <BtnVolverJugar v-if="vidas === 0 || palabraAcertada" @click="volverAJugar"/>
+
   </div>
   
+
 
   <div v-else>
 
@@ -101,12 +121,12 @@ function comprobarPalabra(palabraUsuarioEscrita: string) {
       <InputLetra />
     </div>
 
-    
     <div class="div-restantes" v-for="i in intentos" :key="i">
       <InputLetra :key="`${i}-${resetKey}`" />
     </div>
 
     <BtnProbarSuerte @click="probarSuerte" :key="resetKey"/>
+
 
     <Teclado :letrasUsadas="letrasUsadas"/>
   </div>
