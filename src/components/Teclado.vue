@@ -1,6 +1,18 @@
 <script setup lang="ts">
 
 import { watch } from 'vue'
+const emit = defineEmits(['letraPulsada'])
+
+
+const fila1 = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"];
+const fila2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ñ"];
+const fila3 = ["Z", "X", "C", "V", "B", "N", "M"];
+
+function letraClick(letra: string) {
+  console.log("Has pulsado:", letra);
+    emit('letraPulsada', letra)
+
+}
 
 const props = defineProps<{
   letrasUsadas: string[]
@@ -15,6 +27,7 @@ watch(
       const letra = nuevaLista[i];
       if (letra) {
         const p = obtenerLetra(letra);
+        
         if (p) p.classList.add('usada');
       }
     }
@@ -34,39 +47,21 @@ function obtenerLetra(letra: string) {
 <template>
   <div id="teclado">
     <div class="fila">
-      <p class="letra-teclado">Q</p>
-      <p class="letra-teclado">W</p>
-      <p class="letra-teclado">E</p>
-      <p class="letra-teclado">R</p>
-      <p class="letra-teclado">T</p>
-      <p class="letra-teclado">Y</p>
-      <p class="letra-teclado">U</p>
-      <p class="letra-teclado">I</p>
-      <p class="letra-teclado">O</p>
-      <p class="letra-teclado">P</p>
+      <p class="letra-teclado" v-for="letra in fila1" :key="letra" @click="letraClick(letra)">
+        {{ letra }}
+      </p>
     </div>
 
     <div class="fila">
-      <p class="letra-teclado">A</p>
-      <p class="letra-teclado">S</p>
-      <p class="letra-teclado">D</p>
-      <p class="letra-teclado">F</p>
-      <p class="letra-teclado">G</p>
-      <p class="letra-teclado">H</p>
-      <p class="letra-teclado">J</p>
-      <p class="letra-teclado">K</p>
-      <p class="letra-teclado">L</p>
-      <p class="letra-teclado">Ñ</p>
+      <p class="letra-teclado" v-for="letra in fila2" :key="letra" @click="letraClick(letra)">
+        {{ letra }}
+      </p>
     </div>
 
     <div class="fila">
-      <p class="letra-teclado">Z</p>
-      <p class="letra-teclado">X</p>
-      <p class="letra-teclado">C</p>
-      <p class="letra-teclado">V</p>
-      <p class="letra-teclado">B</p>
-      <p class="letra-teclado">N</p>
-      <p class="letra-teclado">M</p>
+      <p class="letra-teclado" v-for="letra in fila3" :key="letra" @click="letraClick(letra)">
+        {{ letra }}
+      </p>
     </div>
   </div>
 </template>

@@ -22,6 +22,23 @@ const letrasUsadas = ref<string[]>([])
 
 const vidas = ref(6)
 
+function insertarLetra(letra: string) {
+  const inputs = document.querySelectorAll<HTMLInputElement>('.input-letra');
+
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+    if (!input) continue; // ← comprueba que existe
+
+    if (input.value === "") {
+      input.value = letra;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+      break;
+    }
+  }
+}
+
+
 
 onMounted(() => {
   const checkWord = setInterval(() => {
@@ -95,23 +112,15 @@ function volverAJugar(){
 
 
   <div v-else-if="palabraAcertada || vidas === 0" class="acertado">
-
-
     <h2 v-if="vidas != 0">🎉 ¡Palabra acertada!</h2>
     <h2 v-else> Palabra fallada... :( </h2>
-
-
-
     <p>La palabra era: {{ palabraAAdivinar.randomWord }}</p>
-
     <BtnVolverJugar v-if="vidas === 0 || palabraAcertada" @click="volverAJugar"/>
-
   </div>
   
 
 
   <div v-else>
-
     <div class="div-fallidos">
       <InputPalabra v-for="(intento, index) in intentosFallidos" :key="index" :palabra="intento"
         :palabraAdivinar="palabraAAdivinar.randomWord || ''" />
@@ -124,11 +133,10 @@ function volverAJugar(){
     <div class="div-restantes" v-for="i in intentos" :key="i">
       <InputLetra :key="`${i}-${resetKey}`" />
     </div>
-
     <BtnProbarSuerte @click="probarSuerte" :key="resetKey"/>
+    <!-- <Teclado :letrasUsadas="letrasUsadas"/> -->
+     <Teclado :letrasUsadas="letrasUsadas" @letraPulsada="insertarLetra"/>
 
-
-    <Teclado :letrasUsadas="letrasUsadas"/>
   </div>
 </template>
 

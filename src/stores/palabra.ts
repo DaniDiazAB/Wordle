@@ -15,30 +15,26 @@ export const usePalabraAdivinarStore = defineStore("word", () => {
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-const API_URL = 'https://random-word-api.herokuapp.com/word?length=5'
+const API_URL = 'https://danidiaz.site/wordle/api/getData.php'
 
 export const usePalabraAdivinarStore = defineStore("word", () => {
   const randomWord = ref("");
 
   fetch(API_URL)
-    .then(response => response.text()) // Si devuelve solo texto
+  
+    .then(response => response.json()) // Si devuelve solo texto
     .then(palabra => {
-      randomWord.value = palabra.slice(2, -2);
+      
+
+      const indice = Math.floor(Math.random() * palabra.length);
+
+      randomWord.value = palabra[indice].traduccion_palabra
     })
     .catch(error => {
       console.error('Error:', error);
       randomWord.value = "fallback";
     });
-    randomWord.value = limpiarTexto(randomWord.value)
   return { randomWord };
 });
 
-// Elimina cualquier signo de puntuacion de la palabra
-function limpiarTexto(texto: string) {
-  return texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\s]|_/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+
