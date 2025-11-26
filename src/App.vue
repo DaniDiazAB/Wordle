@@ -8,7 +8,6 @@ import { usePalabraAdivinarStore } from './stores/palabra';
 import Teclado from './components/Teclado.vue'
 import BtnVolverJugar from './components/BtnVolverJugar.vue'
 
-let palabraCompleta = true
 let intentos = ref(5)
 let fallidos = ref(0)
 let palabraUsuario = ref("")
@@ -21,45 +20,62 @@ const palabraAcertada = ref(false)
 const letrasUsadas = ref<string[]>([])
 let ultimoInputFocalizado: HTMLInputElement | null = null;
 const vidas = ref(6)
-
+const palabraLimpia = ref("")
 
 onMounted(() => {
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Tab" || e.key === " ") {
+      e.preventDefault();
+    }
+  });
+
   const checkWord = setInterval(() => {
     if (palabraAAdivinar.randomWord) {
-      console.log(palabraAAdivinar.randomWord);
+      palabraLimpia.value = limpiarPalabra(palabraAAdivinar.randomWord)
       appReady.value = true;
       clearInterval(checkWord);
+
     }
   }, 100);
 });
 
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    probarSuerte();
+  }
+});
+
+
+
 function probarSuerte() {
-  intentos.value = intentos.value - 1;
-  fallidos.value = fallidos.value + 1;
-
-  palabraCompleta = true;
-
+ 
   const intentoDiv = document.querySelector(".div-intento");
   const inputs = intentoDiv?.getElementsByClassName("input-letra") as HTMLCollectionOf<HTMLInputElement>;
-
   let palabraUsuarioAdivinar = "";
+  let palabraCompleta = true;
 
+ 
   for (let i = 0; i < inputs.length; i++) {
     const letraActual = inputs[i]?.value || '';
     palabraUsuarioAdivinar += letraActual;
-    
-    if (letraActual === "") {
+    if (letraActual === "" || letraActual === " ") {
       palabraCompleta = false;
-    } else {
-      if (!letrasUsadas.value.includes(letraActual)) {
-        letrasUsadas.value.push(letraActual);
-      }
     }
   }
 
+  for (let i = 0; i < inputs.length; i++) {
+    const letraActual = inputs[i]?.value || '';
+    if (!letrasUsadas.value.includes(letraActual) && palabraCompleta) {
+        letrasUsadas.value.push(letraActual);
+      }
+  }
+
   if (palabraCompleta) {
+    intentos.value = intentos.value - 1;
+    fallidos.value = fallidos.value + 1;
     palabraUsuario.value = palabraUsuarioAdivinar;
-    comprobarPalabra(palabraUsuario.value);    
+    comprobarPalabra(palabraUsuario.value);
     resetKey.value += 1;
     setTimeout(() => {
       const nextInput = document.querySelector<HTMLInputElement>('.input-letra');
@@ -67,27 +83,34 @@ function probarSuerte() {
       vidas.value--;
     }, 0);
   } else {
-    console.log("Por favor, rellene todos los espacios");
+    alert("Por favor, rellene todos los espacios")
   }
+
 }
 
 function comprobarPalabra(palabraUsuarioEscrita: string) {
-  if (palabraUsuarioEscrita.toLowerCase() == palabraAAdivinar.randomWord?.toLowerCase()) {
+  
+  if (palabraUsuarioEscrita.toLowerCase() == palabraLimpia.value?.toLowerCase()) {
     palabraAcertada.value = true
     vidas.value = 0
   } else {
     intentosFallidos.value.push(palabraUsuarioEscrita)
   }
+  
 }
 
-function volverAJugar(){
+
+
+function volverAJugar() {
   window.location.reload();
 }
 
+// Cambiar el input
 function registrarInputFoco(e: Event) {
   ultimoInputFocalizado = e.target as HTMLInputElement;
 }
 
+// Funcion para escribir desde el teclado virtual
 function insertarLetra(letra: string) {
   if (ultimoInputFocalizado) {
     ultimoInputFocalizado.value = letra;
@@ -107,6 +130,25 @@ function insertarLetra(letra: string) {
   }
 }
 
+// Funcion para eliminar los acentos de la palabra que se elige
+function limpiarPalabra(texto: string): string {
+  let sinTildes = texto
+    .replace(/á/g, "a")
+    .replace(/é/g, "e")
+    .replace(/í/g, "i")
+    .replace(/ó/g, "o")
+    .replace(/ú/g, "u")
+    .replace(/Á/g, "A")
+    .replace(/É/g, "E")
+    .replace(/Í/g, "I")
+    .replace(/Ó/g, "O")
+    .replace(/Ú/g, "U");
+
+  let resultado = sinTildes.replace(/[^a-zA-Z0-9 ñÑ]/g, "");
+
+  return resultado;
+}
+
 </script>
 
 <template>
@@ -120,27 +162,28 @@ function insertarLetra(letra: string) {
   <div v-else-if="palabraAcertada || vidas === 0" class="acertado">
     <h2 v-if="vidas != 0">🎉 ¡Palabra acertada!</h2>
     <h2 v-else> Palabra fallada... :( </h2>
-    <p>La palabra era: {{ palabraAAdivinar.randomWord }}</p>
-    <BtnVolverJugar v-if="vidas === 0 || palabraAcertada" @click="volverAJugar"/>
+    <p>La palabra era: {{ palabraLimpia }}</p>
+    <BtnVolverJugar v-if="vidas === 0 || palabraAcertada" @click="volverAJugar" />
   </div>
-  
+
 
 
   <div v-else>
     <div class="div-fallidos">
       <InputPalabra v-for="(intento, index) in intentosFallidos" :key="index" :palabra="intento"
-        :palabraAdivinar="palabraAAdivinar.randomWord || ''" />
+        :palabraAdivinar="palabraLimpia || ''" />
     </div>
 
     <div class="div-intento" :key="resetKey">
       <InputLetra @update:focus="registrarInputFoco" />
     </div>
 
-    <div class="div-restantes" v-for="i in intentos" :key="i">
+    <div class="div-restantes" v-for="i in intentos" :key="i" disable>
       <InputLetra :key="`${i}-${resetKey}`" />
     </div>
-    <BtnProbarSuerte @click="probarSuerte" :key="resetKey"/>
-    <Teclado :letrasUsadas="letrasUsadas" @letraPulsada="insertarLetra"/>
+
+    <BtnProbarSuerte @click="probarSuerte" :key="resetKey" />
+    <Teclado :letrasUsadas="letrasUsadas" @letraPulsada="insertarLetra" />
 
   </div>
 </template>
@@ -148,13 +191,11 @@ function insertarLetra(letra: string) {
 
 
 <style scoped>
-
 .div-restantes :deep(.input-letra) {
+  pointer-events: none;
   background-color: grey !important;
   color: black !important;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
-  border-color: #e0e0e0 !important;
+
 }
 
 .div-restantes .input-letra {
@@ -183,5 +224,71 @@ function insertarLetra(letra: string) {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.acertado {
+  position: relative;
+  animation: fadeZoomIn 0.6s ease forwards;
+  overflow: visible;
+}
+
+/* Fade + Zoom */
+@keyframes fadeZoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Fuegos artificiales */
+.acertado::before,
+.acertado::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow:
+    0 -40px #ff2, 28px -28px #f06, 40px 0 #0f0, 28px 28px #09f,
+    0 40px #f90, -28px 28px #f0f, -40px 0 #0ff, -28px -28px #f00,
+    0 -60px #ff0, 42px -42px #f0a, 60px 0 #0f9, 42px 42px #09a,
+    0 60px #fa0, -42px 42px #f09, -60px 0 #0ff, -42px -42px #f0f;
+  opacity: 0;
+  transform: scale(0);
+  animation: fireworks 1s ease-out forwards;
+}
+
+.acertado::after {
+  animation-delay: 0.15s;
+}
+
+/* Animación de la explosión */
+@keyframes fireworks {
+  0% {
+    opacity: 1;
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(2);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(2.5);
+  }
 }
 </style>

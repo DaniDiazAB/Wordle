@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import { usePalabraAdivinarStore } from '../stores/palabra';
 
-// Definimos el emit para avisar al padre
 const emit = defineEmits(['update:focus']) 
 
 const espaciosRellenar = usePalabraAdivinarStore().randomWord?.length;
@@ -14,8 +13,6 @@ const handleInput = (index: number, event: Event) => {
   letras.value[index] = target.value
 
   if (target.value && index < letras.value.length - 1) {
-    // Nota: Esto busca en todo el documento, idealmente debería buscar solo en este componente,
-    // pero para este arreglo mantendremos tu lógica actual.
     const inputs = document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra')
     const nextInput = inputs[index + 1]
     nextInput?.focus()
@@ -46,6 +43,7 @@ const handleKeydown = (index: number, event: KeyboardEvent) => {
       @input="handleInput(i, $event)"
       @keydown="handleKeydown(i, $event)"
       @focus="emit('update:focus', $event)" 
+      autofocus
     />
     </div>
 </template>
