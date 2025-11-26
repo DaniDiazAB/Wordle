@@ -19,25 +19,8 @@ const resetKey = ref(0)
 const appReady = ref(false);
 const palabraAcertada = ref(false)
 const letrasUsadas = ref<string[]>([])
-
+let ultimoInputFocalizado: HTMLInputElement | null = null;
 const vidas = ref(6)
-
-function insertarLetra(letra: string) {
-  const inputs = document.querySelectorAll<HTMLInputElement>('.input-letra');
-
-  for (let i = 0; i < inputs.length; i++) {
-    const input = inputs[i];
-    if (!input) continue; // ← comprueba que existe
-
-    if (input.value === "") {
-      input.value = letra;
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      input.focus();
-      break;
-    }
-  }
-}
-
 
 
 onMounted(() => {
@@ -101,6 +84,29 @@ function volverAJugar(){
   window.location.reload();
 }
 
+function registrarInputFoco(e: Event) {
+  ultimoInputFocalizado = e.target as HTMLInputElement;
+}
+
+function insertarLetra(letra: string) {
+  if (ultimoInputFocalizado) {
+    ultimoInputFocalizado.value = letra;
+    ultimoInputFocalizado.dispatchEvent(new Event('input', { bubbles: true }));
+  } else {
+    const inputs = document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra');
+    for (let i = 0; i < inputs.length; i++) {
+      const input = inputs[i];
+      if (!input) continue;
+      if (input.value === "") {
+        input.value = letra;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.focus();
+        break;
+      }
+    }
+  }
+}
+
 </script>
 
 <template>
@@ -127,15 +133,14 @@ function volverAJugar(){
     </div>
 
     <div class="div-intento" :key="resetKey">
-      <InputLetra />
+      <InputLetra @update:focus="registrarInputFoco" />
     </div>
 
     <div class="div-restantes" v-for="i in intentos" :key="i">
       <InputLetra :key="`${i}-${resetKey}`" />
     </div>
     <BtnProbarSuerte @click="probarSuerte" :key="resetKey"/>
-    <!-- <Teclado :letrasUsadas="letrasUsadas"/> -->
-     <Teclado :letrasUsadas="letrasUsadas" @letraPulsada="insertarLetra"/>
+    <Teclado :letrasUsadas="letrasUsadas" @letraPulsada="insertarLetra"/>
 
   </div>
 </template>

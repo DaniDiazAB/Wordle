@@ -2,6 +2,9 @@
 import { ref } from 'vue'
 import { usePalabraAdivinarStore } from '../stores/palabra';
 
+// Definimos el emit para avisar al padre
+const emit = defineEmits(['update:focus']) 
+
 const espaciosRellenar = usePalabraAdivinarStore().randomWord?.length;
 const letras = ref<string[]>(Array(espaciosRellenar).fill('')) 
 
@@ -11,7 +14,10 @@ const handleInput = (index: number, event: Event) => {
   letras.value[index] = target.value
 
   if (target.value && index < letras.value.length - 1) {
-    const nextInput = document.querySelectorAll<HTMLInputElement>('.input-letra')[index + 1]
+    // Nota: Esto busca en todo el documento, idealmente debería buscar solo en este componente,
+    // pero para este arreglo mantendremos tu lógica actual.
+    const inputs = document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra')
+    const nextInput = inputs[index + 1]
     nextInput?.focus()
   }
 }
@@ -19,7 +25,8 @@ const handleInput = (index: number, event: Event) => {
 const handleKeydown = (index: number, event: KeyboardEvent) => {
   if (event.key === 'Backspace' || event.key === 'Delete') {
     if (!letras.value[index] && index > 0) {
-      const prevInput = document.querySelectorAll<HTMLInputElement>('.input-letra')[index - 1]
+      const inputs = document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra')
+      const prevInput = inputs[index - 1]
       prevInput?.focus()
       letras.value[index - 1] = ''
     } else {
@@ -38,8 +45,9 @@ const handleKeydown = (index: number, event: KeyboardEvent) => {
       v-model="letras[i]"
       @input="handleInput(i, $event)"
       @keydown="handleKeydown(i, $event)"
+      @focus="emit('update:focus', $event)" 
     />
-  </div>
+    </div>
 </template>
 
 <style>
