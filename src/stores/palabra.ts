@@ -17,13 +17,20 @@ import { ref } from "vue";
 
 const API_URL = 'https://danidiaz.site/wordle/api/getData.php'
 
+
 export const usePalabraAdivinarStore = defineStore("word", () => {
   const randomWord = ref("");
+  const listaPalabras = ref([]);
+
+  
 
   fetch(API_URL)
   
     .then(response => response.json()) // Si devuelve solo texto
     .then(palabra => {
+    listaPalabras.value = palabra;
+
+
       const indice = Math.floor(Math.random() * palabra.length);
       randomWord.value = palabra[indice].traduccion_palabra
     })
@@ -31,7 +38,7 @@ export const usePalabraAdivinarStore = defineStore("word", () => {
       console.error('Error:', error);
       randomWord.value = "fallback";
     });
-  return { randomWord };
+  return { randomWord, listaPalabras };
 });
 
 

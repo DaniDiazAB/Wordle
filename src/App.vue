@@ -8,11 +8,16 @@ import { usePalabraAdivinarStore } from './stores/palabra';
 import Teclado from './components/Teclado.vue'
 import BtnVolverJugar from './components/BtnVolverJugar.vue'
 
+interface PalabraObjeto {
+  traduccion_palabra: string;
+  ingles_palabra?: string;
+}
+
+const palabraAAdivinar = usePalabraAdivinarStore();
+
 let intentos = ref(5)
 let fallidos = ref(0)
 let palabraUsuario = ref("")
-const palabraAAdivinar = usePalabraAdivinarStore();
-const emit = defineEmits(['enviarPalabra'])
 const intentosFallidos = ref<string[]>([])
 const resetKey = ref(0)
 const appReady = ref(false);
@@ -23,7 +28,6 @@ const vidas = ref(6)
 const palabraLimpia = ref("")
 
 onMounted(() => {
-
   window.addEventListener("keydown", (e) => {
     if (e.key === "Tab" || e.key === " ") {
       e.preventDefault();
@@ -35,7 +39,6 @@ onMounted(() => {
       palabraLimpia.value = limpiarPalabra(palabraAAdivinar.randomWord)
       appReady.value = true;
       clearInterval(checkWord);
-
     }
   }, 100);
 });
@@ -46,125 +49,115 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
-
-
 function probarSuerte() {
-
   const intentoDiv = document.querySelector(".div-intento");
   const inputs = intentoDiv?.getElementsByClassName("input-letra") as HTMLCollectionOf<HTMLInputElement>;
+  
   let palabraUsuarioAdivinar = "";
-  let palabraCompleta = true;
-
+  let isPalabraCompleta = true;
 
   for (let i = 0; i < inputs.length; i++) {
     const letraActual = inputs[i]?.value || '';
     palabraUsuarioAdivinar += letraActual;
-    if (letraActual === "" || letraActual === " ") {
-      palabraCompleta = false;
+    if (letraActual.trim() === "") {
+      isPalabraCompleta = false;
     }
   }
 
+  const lista = (palabraAAdivinar.listaPalabras as unknown as PalabraObjeto[]) || [];
+  
+  const palabraEnDiccionario = lista.some(item => 
+    limpiarPalabra(item.traduccion_palabra).toUpperCase() === limpiarPalabra(palabraUsuarioAdivinar).toUpperCase()
+  );
+
+  if (!isPalabraCompleta) {
+    alert("Por favor, rellene todos los espacios");
+    return;
+  }
+
+  if (!palabraEnDiccionario) {
+    alert("La palabra no está en el diccionario");
+    return;
+  }
+
+  actualizarEstadoJuego(inputs, palabraUsuarioAdivinar);
+}
+
+function actualizarEstadoJuego(inputs: HTMLCollectionOf<HTMLInputElement>, palabraUsuarioAdivinar: string) {
   for (let i = 0; i < inputs.length; i++) {
     const letraActual = inputs[i]?.value || '';
-    if (!letrasUsadas.value.includes(letraActual) && palabraCompleta) {
+    if (!letrasUsadas.value.includes(letraActual)) {
       letrasUsadas.value.push(letraActual);
     }
   }
 
-  if (palabraCompleta) {
-    intentos.value = intentos.value - 1;
-    fallidos.value = fallidos.value + 1;
-    palabraUsuario.value = palabraUsuarioAdivinar;
-    comprobarPalabra(palabraUsuario.value);
-    resetKey.value += 1;
-    setTimeout(() => {
-      const nextInput = document.querySelector<HTMLInputElement>('.input-letra');
-      nextInput?.focus();
-      vidas.value--;
-    }, 0);
-  } else {
-    alert("Por favor, rellene todos los espacios")
-  }
+  intentos.value--;
+  fallidos.value++;
+  palabraUsuario.value = palabraUsuarioAdivinar;
+  
+  comprobarPalabra(palabraUsuario.value);
+  
+  resetKey.value += 1;
+  vidas.value--;
 
+  setTimeout(() => {
+    const nextInput = document.querySelector<HTMLInputElement>('.input-letra');
+    nextInput?.focus();
+  }, 0);
 }
 
 function comprobarPalabra(palabraUsuarioEscrita: string) {
-
-  if (palabraUsuarioEscrita.toLowerCase() == palabraLimpia.value?.toLowerCase()) {
+  if (limpiarPalabra(palabraUsuarioEscrita).toLowerCase() === palabraLimpia.value?.toLowerCase()) {
     palabraAcertada.value = true
     vidas.value = 0
   } else {
     intentosFallidos.value.push(palabraUsuarioEscrita)
   }
-
 }
 
 function volverAJugar() {
   window.location.reload();
 }
 
-// Cambiar el input
 function registrarInputFoco(e: Event) {
   ultimoInputFocalizado = e.target as HTMLInputElement;
 }
 
-// Funcion para escribir desde el teclado virtual
 function insertarLetra(letra: string) {
-  if (letra === "DEL") {
   const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra'));
   
-  for (let i = inputs.length - 1; i >= 0; i--) {
-    const el = inputs[i]; 
-    
-    if (el && el.value !== "") { 
-      el.value = "";
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.focus();
-      break;
+  if (letra === "DEL") {
+    for (let i = inputs.length - 1; i >= 0; i--) {
+      const el = inputs[i];
+      if (el && el.value !== "") {
+        el.value = "";
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.focus();
+        break;
+      }
     }
-  }
-} else {
-    if (ultimoInputFocalizado) {
+  } else {
+    if (ultimoInputFocalizado && ultimoInputFocalizado.value === "") {
       ultimoInputFocalizado.value = letra;
       ultimoInputFocalizado.dispatchEvent(new Event('input', { bubbles: true }));
     } else {
-      const inputs = document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra');
-      for (let i = 0; i < inputs.length; i++) {
-        const input = inputs[i];
-        if (!input) continue;
-        if (input.value === "") {
-          input.value = letra;
-          input.dispatchEvent(new Event('input', { bubbles: true }));
-          input.focus();
-          break;
-        }
+      const primerVacio = inputs.find(input => input.value === "");
+      if (primerVacio) {
+        primerVacio.value = letra;
+        primerVacio.dispatchEvent(new Event('input', { bubbles: true }));
+        primerVacio.focus();
       }
     }
-
   }
-
-
 }
 
-// Funcion para eliminar los acentos de la palabra que se elige
 function limpiarPalabra(texto: string): string {
-  let sinTildes = texto
-    .replace(/á/g, "a")
-    .replace(/é/g, "e")
-    .replace(/í/g, "i")
-    .replace(/ó/g, "o")
-    .replace(/ú/g, "u")
-    .replace(/Á/g, "A")
-    .replace(/É/g, "E")
-    .replace(/Í/g, "I")
-    .replace(/Ó/g, "O")
-    .replace(/Ú/g, "U");
-
-  let resultado = sinTildes.replace(/[^a-zA-Z0-9 ñÑ]/g, "");
-
-  return resultado;
+  if (!texto) return "";
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Elimina acentos de forma global
+    .replace(/[^a-zA-Z0-9 ñÑ]/g, ""); // Mantiene solo alfanuméricos y eñes
 }
-
 </script>
 
 <template>
@@ -181,8 +174,6 @@ function limpiarPalabra(texto: string): string {
     <p>La palabra era: {{ palabraLimpia }}</p>
     <BtnVolverJugar v-if="vidas === 0 || palabraAcertada" @click="volverAJugar" />
   </div>
-
-
 
   <div v-else>
     <div class="div-fallidos">
@@ -203,8 +194,6 @@ function limpiarPalabra(texto: string): string {
 
   </div>
 </template>
-
-
 
 <style scoped>
 .div-restantes :deep(.input-letra) {
