@@ -49,13 +49,13 @@ document.addEventListener("keydown", function (event) {
 
 
 function probarSuerte() {
- 
+
   const intentoDiv = document.querySelector(".div-intento");
   const inputs = intentoDiv?.getElementsByClassName("input-letra") as HTMLCollectionOf<HTMLInputElement>;
   let palabraUsuarioAdivinar = "";
   let palabraCompleta = true;
 
- 
+
   for (let i = 0; i < inputs.length; i++) {
     const letraActual = inputs[i]?.value || '';
     palabraUsuarioAdivinar += letraActual;
@@ -67,8 +67,8 @@ function probarSuerte() {
   for (let i = 0; i < inputs.length; i++) {
     const letraActual = inputs[i]?.value || '';
     if (!letrasUsadas.value.includes(letraActual) && palabraCompleta) {
-        letrasUsadas.value.push(letraActual);
-      }
+      letrasUsadas.value.push(letraActual);
+    }
   }
 
   if (palabraCompleta) {
@@ -89,17 +89,15 @@ function probarSuerte() {
 }
 
 function comprobarPalabra(palabraUsuarioEscrita: string) {
-  
+
   if (palabraUsuarioEscrita.toLowerCase() == palabraLimpia.value?.toLowerCase()) {
     palabraAcertada.value = true
     vidas.value = 0
   } else {
     intentosFallidos.value.push(palabraUsuarioEscrita)
   }
-  
+
 }
-
-
 
 function volverAJugar() {
   window.location.reload();
@@ -112,22 +110,40 @@ function registrarInputFoco(e: Event) {
 
 // Funcion para escribir desde el teclado virtual
 function insertarLetra(letra: string) {
-  if (ultimoInputFocalizado) {
-    ultimoInputFocalizado.value = letra;
-    ultimoInputFocalizado.dispatchEvent(new Event('input', { bubbles: true }));
-  } else {
-    const inputs = document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra');
-    for (let i = 0; i < inputs.length; i++) {
-      const input = inputs[i];
-      if (!input) continue;
-      if (input.value === "") {
-        input.value = letra;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        input.focus();
-        break;
-      }
+  if (letra === "DEL") {
+  const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra'));
+  
+  for (let i = inputs.length - 1; i >= 0; i--) {
+    const el = inputs[i]; 
+    
+    if (el && el.value !== "") { 
+      el.value = "";
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.focus();
+      break;
     }
   }
+} else {
+    if (ultimoInputFocalizado) {
+      ultimoInputFocalizado.value = letra;
+      ultimoInputFocalizado.dispatchEvent(new Event('input', { bubbles: true }));
+    } else {
+      const inputs = document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra');
+      for (let i = 0; i < inputs.length; i++) {
+        const input = inputs[i];
+        if (!input) continue;
+        if (input.value === "") {
+          input.value = letra;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.focus();
+          break;
+        }
+      }
+    }
+
+  }
+
+
 }
 
 // Funcion para eliminar los acentos de la palabra que se elige

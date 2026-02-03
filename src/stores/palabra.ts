@@ -24,10 +24,7 @@ export const usePalabraAdivinarStore = defineStore("word", () => {
   
     .then(response => response.json()) // Si devuelve solo texto
     .then(palabra => {
-      
-
       const indice = Math.floor(Math.random() * palabra.length);
-
       randomWord.value = palabra[indice].traduccion_palabra
     })
     .catch(error => {

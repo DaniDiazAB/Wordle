@@ -9,8 +9,8 @@ const fila2 = ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ñ"];
 const fila3 = ["Z", "X", "C", "V", "B", "N", "M"];
 
 function letraClick(letra: string) {
-  console.log("Has pulsado:", letra);
-    emit('letraPulsada', letra)
+  //console.log("Has pulsado:", letra);
+  emit('letraPulsada', letra)
 
 }
 
@@ -62,6 +62,9 @@ function obtenerLetra(letra: string) {
       <p class="letra-teclado" v-for="letra in fila3" :key="letra" @click="letraClick(letra)">
         {{ letra }}
       </p>
+      <p class="delete-teclado" @click="letraClick('DEL')">
+        DEL
+      </p>
     </div>
   </div>
 </template>
@@ -106,6 +109,34 @@ function obtenerLetra(letra: string) {
 
 .letra-teclado:active {
   background-color: #9fa3a7;
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.delete-teclado{
+  width: 50px;
+  height: 60px;
+  background-color: #990000;
+  color: #000;
+  font-weight: bold;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  user-select: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 0 #540000;
+}
+
+.delete-teclado:hover {
+  background-color: #990000;
+  transform: translateY(-2px);
+}
+
+.delete-teclado:active {
+  background-color: #990000;
   transform: translateY(2px);
   box-shadow: none;
 }
