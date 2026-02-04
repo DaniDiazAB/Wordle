@@ -22,17 +22,13 @@ export const usePalabraAdivinarStore = defineStore("word", () => {
   const randomWord = ref("");
   const listaPalabras = ref([]);
 
-  
-
   fetch(API_URL)
   
-    .then(response => response.json()) // Si devuelve solo texto
+    .then(response => response.json()) 
     .then(palabra => {
-    listaPalabras.value = palabra;
-
-
+      listaPalabras.value = palabra;
       const indice = Math.floor(Math.random() * palabra.length);
-      randomWord.value = palabra[indice].traduccion_palabra
+      randomWord.value = palabra[indice].palabra_wordle_palabra
     })
     .catch(error => {
       console.error('Error:', error);

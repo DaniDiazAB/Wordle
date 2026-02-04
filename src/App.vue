@@ -9,8 +9,7 @@ import Teclado from './components/Teclado.vue'
 import BtnVolverJugar from './components/BtnVolverJugar.vue'
 
 interface PalabraObjeto {
-  traduccion_palabra: string;
-  ingles_palabra?: string;
+  palabra_wordle_palabra: string;
 }
 
 const palabraAAdivinar = usePalabraAdivinarStore();
@@ -72,14 +71,14 @@ function probarSuerte() {
   const lista = (palabraAAdivinar.listaPalabras as unknown as PalabraObjeto[]) || [];
   
   const palabraEnDiccionario = lista.some(item => 
-    limpiarPalabra(item.traduccion_palabra).toUpperCase() === limpiarPalabra(palabraUsuarioAdivinar).toUpperCase()
+    limpiarPalabra(item.palabra_wordle_palabra).toUpperCase() === limpiarPalabra(palabraUsuarioAdivinar).toUpperCase()
   );
 
   if (!isPalabraCompleta) {
     alert("Por favor, rellene todos los espacios");
     return;
   }
-
+  
   if (!palabraEnDiccionario) {
     alert("La palabra no está en el diccionario");
     return;
