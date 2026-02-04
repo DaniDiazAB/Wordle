@@ -14,7 +14,6 @@ interface PalabraObjeto {
 }
 
 const palabraAAdivinar = usePalabraAdivinarStore();
-
 let intentos = ref(5)
 let fallidos = ref(0)
 let palabraUsuario = ref("")
@@ -22,7 +21,11 @@ const intentosFallidos = ref<string[]>([])
 const resetKey = ref(0)
 const appReady = ref(false);
 const palabraAcertada = ref(false)
-const letrasUsadas = ref<string[]>([])
+
+const acertadas = ref<string[]>([]);
+const desubicadas = ref<string[]>([]);
+const fallidas = ref<string[]>([]);
+
 let ultimoInputFocalizado: HTMLInputElement | null = null;
 const vidas = ref(6)
 const palabraLimpia = ref("")
@@ -50,6 +53,8 @@ document.addEventListener("keydown", function (event) {
 });
 
 function probarSuerte() {
+  console.log(palabraAAdivinar.randomWord);
+
   const intentoDiv = document.querySelector(".div-intento");
   const inputs = intentoDiv?.getElementsByClassName("input-letra") as HTMLCollectionOf<HTMLInputElement>;
   
@@ -80,16 +85,23 @@ function probarSuerte() {
     return;
   }
 
-  actualizarEstadoJuego(inputs, palabraUsuarioAdivinar);
+  actualizarEstadoJuego(palabraUsuarioAdivinar);
 }
 
-function actualizarEstadoJuego(inputs: HTMLCollectionOf<HTMLInputElement>, palabraUsuarioAdivinar: string) {
-  for (let i = 0; i < inputs.length; i++) {
-    const letraActual = inputs[i]?.value || '';
-    if (!letrasUsadas.value.includes(letraActual)) {
-      letrasUsadas.value.push(letraActual);
+function actualizarEstadoJuego(palabraUsuarioAdivinar: string) {
+  const objetivo = palabraLimpia.value.toUpperCase();
+  const intento = palabraUsuarioAdivinar.toUpperCase();
+
+  intento.split('').forEach((letra, i) => {
+    if (letra === objetivo[i]) {
+      if (!acertadas.value.includes(letra)) acertadas.value.push(letra);
+      desubicadas.value = desubicadas.value.filter(l => l !== letra); // Sube de nivel
+    } else if (objetivo.includes(letra)) {
+      if (!acertadas.value.includes(letra) && !desubicadas.value.includes(letra)) desubicadas.value.push(letra);
+    } else {
+      if (!fallidas.value.includes(letra)) fallidas.value.push(letra);
     }
-  }
+  });
 
   intentos.value--;
   fallidos.value++;
@@ -190,7 +202,7 @@ function limpiarPalabra(texto: string): string {
     </div>
 
     <BtnProbarSuerte @click="probarSuerte" :key="resetKey" />
-    <Teclado :letrasUsadas="letrasUsadas" @letraPulsada="insertarLetra" />
+    <Teclado :acertadas="acertadas" :desubicadas="desubicadas" :fallidas="fallidas" @letraPulsada="insertarLetra" />
 
   </div>
 </template>
