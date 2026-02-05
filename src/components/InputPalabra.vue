@@ -39,35 +39,56 @@ function getClaseLetra(letra: string, index: number) {
 <style scoped>
 .palabra {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: center;
 }
 
 .letra {
-  width: 60px;
-  height: 60px;
-  font-size: 2rem;
-  font-weight: bold;
+  width: 54px;
+  height: 54px;
+  border: 2px solid #3a3a3c;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  border: 2px solid #ccc;
+  font-size: 28px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background-color: #121213;
+  color: #ffffff;
+  transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
 }
 
-/* Colores tipo Wordle */
 .correcta {
-  background-color: #6aaa64; /* verde */
-  color: white;
+  background-color: #538d4e;
+  border-color: #538d4e;
 }
 
 .parcial {
-  background-color: #c9b458; /* amarillo */
-  color: white;
+  background-color: #b59f3b;
+  border-color: #b59f3b;
 }
 
 .incorrecta {
-  background-color: #787c7e; /* gris */
-  color: white;
+  background-color: #3a3a3c;
+  border-color: #3a3a3c;
+}
+
+.letra.correcta,
+.letra.parcial,
+.letra.incorrecta {
+  animation: flip 0.5s ease;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0);
+  }
 }
 </style>
+

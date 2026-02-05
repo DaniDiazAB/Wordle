@@ -12,6 +12,7 @@ interface PalabraObjeto {
   palabra_wordle_palabra: string;
 }
 
+const errorShake = ref(false)
 const palabraAAdivinar = usePalabraAdivinarStore();
 let intentos = ref(5)
 let fallidos = ref(0)
@@ -52,11 +53,9 @@ document.addEventListener("keydown", function (event) {
 });
 
 function probarSuerte() {
-  console.log(palabraAAdivinar.randomWord);
-
   const intentoDiv = document.querySelector(".div-intento");
   const inputs = intentoDiv?.getElementsByClassName("input-letra") as HTMLCollectionOf<HTMLInputElement>;
-  
+
   let palabraUsuarioAdivinar = "";
   let isPalabraCompleta = true;
 
@@ -69,20 +68,21 @@ function probarSuerte() {
   }
 
   const lista = (palabraAAdivinar.listaPalabras as unknown as PalabraObjeto[]) || [];
-  
-  const palabraEnDiccionario = lista.some(item => 
+
+  const palabraEnDiccionario = lista.some(item =>
     limpiarPalabra(item.palabra_wordle_palabra).toUpperCase() === limpiarPalabra(palabraUsuarioAdivinar).toUpperCase()
   );
 
   if (!isPalabraCompleta) {
-    alert("Por favor, rellene todos los espacios");
-    return;
+    mostrarError()
+    return
   }
-  
+
   if (!palabraEnDiccionario) {
-    alert("La palabra no está en el diccionario");
-    return;
+    mostrarError()
+    return
   }
+
 
   actualizarEstadoJuego(palabraUsuarioAdivinar);
 }
@@ -105,9 +105,9 @@ function actualizarEstadoJuego(palabraUsuarioAdivinar: string) {
   intentos.value--;
   fallidos.value++;
   palabraUsuario.value = palabraUsuarioAdivinar;
-  
+
   comprobarPalabra(palabraUsuario.value);
-  
+
   resetKey.value += 1;
   vidas.value--;
 
@@ -136,7 +136,7 @@ function registrarInputFoco(e: Event) {
 
 function insertarLetra(letra: string) {
   const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('.div-intento .input-letra'));
-  
+
   if (letra === "DEL") {
     for (let i = inputs.length - 1; i >= 0; i--) {
       const el = inputs[i];
@@ -169,142 +169,109 @@ function limpiarPalabra(texto: string): string {
     .replace(/[\u0300-\u036f]/g, "") // Elimina acentos de forma global
     .replace(/[^a-zA-Z0-9 ñÑ]/g, ""); // Mantiene solo alfanuméricos y eñes
 }
+
+function mostrarError() {
+  errorShake.value = true
+  setTimeout(() => errorShake.value = false, 400)
+}
 </script>
 
 <template>
   <Bienvenida />
+  <div class="fila-intento" :class="{ shake: errorShake }">
 
-  <div v-if="!appReady" class="loading">
-    <p>Cargando palabra...</p>
-  </div>
-
-
-  <div v-else-if="palabraAcertada || vidas === 0" class="acertado">
-    <h2 v-if="vidas != 0">🎉 ¡Palabra acertada!</h2>
-    <h2 v-else> Palabra fallada... :( </h2>
-    <p>La palabra era: {{ palabraLimpia }}</p>
-    <BtnVolverJugar v-if="vidas === 0 || palabraAcertada" @click="volverAJugar" />
-  </div>
-
-  <div v-else>
-    <div class="div-fallidos">
-      <InputPalabra v-for="(intento, index) in intentosFallidos" :key="index" :palabra="intento"
-        :palabraAdivinar="palabraLimpia || ''" />
+    <div v-if="!appReady" class="loading">
+      <p>Cargando palabra...</p>
     </div>
 
-    <div class="div-intento" :key="resetKey">
-      <InputLetra @update:focus="registrarInputFoco" />
+
+    <div v-else-if="palabraAcertada || vidas === 0" class="acertado">
+      <h2 v-if="vidas != 0">🎉 ¡Palabra acertada!</h2>
+      <h2 v-else> Palabra fallada... :( </h2>
+      <p>La palabra era: {{ palabraLimpia }}</p>
+      <BtnVolverJugar v-if="vidas === 0 || palabraAcertada" @click="volverAJugar" />
     </div>
 
-    <div class="div-restantes" v-for="i in intentos" :key="i" disable>
-      <InputLetra :key="`${i}-${resetKey}`" />
+    <div v-else>
+      <div class="div-fallidos">
+        <InputPalabra v-for="(intento, index) in intentosFallidos" :key="index" :palabra="intento"
+          :palabraAdivinar="palabraLimpia || ''" />
+      </div>
+
+      <div class="div-intento" :key="resetKey">
+        <InputLetra @update:focus="registrarInputFoco" />
+      </div>
+
+      <div class="div-restantes" v-for="i in intentos" :key="i" disable>
+        <InputLetra :key="`${i}-${resetKey}`" />
+      </div>
+
+      <BtnProbarSuerte @click="probarSuerte" :key="resetKey" />
+      <Teclado :acertadas="acertadas" :desubicadas="desubicadas" :fallidas="fallidas" @letraPulsada="insertarLetra" />
+
     </div>
-
-    <BtnProbarSuerte @click="probarSuerte" :key="resetKey" />
-    <Teclado :acertadas="acertadas" :desubicadas="desubicadas" :fallidas="fallidas" @letraPulsada="insertarLetra" />
-
   </div>
 </template>
 
 <style scoped>
-.div-restantes :deep(.input-letra) {
-  pointer-events: none;
-  background-color: grey !important;
-  color: black !important;
-
-}
-
-.div-restantes .input-letra {
-  user-select: none;
-  pointer-events: none;
-}
-
-.intento-fallido {
+.fila-intento {
+  min-height: 100vh;
+  color: #ffffff;
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.letra {
-  width: 60px;
-  height: 60px;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  background-color: grey;
-  color: #000;
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  transform-origin: top center;
+}
+
+.loading {
+  margin-top: 120px;
+  font-size: 18px;
+  color: #d7dadc;
 }
 
 .acertado {
-  position: relative;
-  animation: fadeZoomIn 0.6s ease forwards;
-  overflow: visible;
+  margin-top: 100px;
+  text-align: center;
 }
 
-/* Fade + Zoom */
-@keyframes fadeZoomIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-
-  60% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.acertado h2 {
+  margin-bottom: 10px;
+  font-size: 26px;
 }
 
-/* Fuegos artificiales */
-.acertado::before,
-.acertado::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: transparent;
-  box-shadow:
-    0 -40px #ff2, 28px -28px #f06, 40px 0 #0f0, 28px 28px #09f,
-    0 40px #f90, -28px 28px #f0f, -40px 0 #0ff, -28px -28px #f00,
-    0 -60px #ff0, 42px -42px #f0a, 60px 0 #0f9, 42px 42px #09a,
-    0 60px #fa0, -42px 42px #f09, -60px 0 #0ff, -42px -42px #f0f;
-  opacity: 0;
-  transform: scale(0);
-  animation: fireworks 1s ease-out forwards;
+.acertado p {
+  font-size: 18px;
+  color: #d7dadc;
 }
 
-.acertado::after {
-  animation-delay: 0.15s;
+.div-fallidos {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-/* Animación de la explosión */
-@keyframes fireworks {
-  0% {
-    opacity: 1;
-    transform: scale(0);
-  }
-
-  50% {
-    transform: scale(2);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(2.5);
-  }
+.div-intento,
+.div-restantes {
+  margin-bottom: 8px;
 }
+
+.div-restantes {
+  opacity: 0.4;
+}
+
+.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+
 </style>

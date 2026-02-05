@@ -48,23 +48,31 @@ const handleKeydown = (index: number, event: KeyboardEvent) => {
     </div>
 </template>
 
-<style>
+<style scoped>
 .input-letra {
-  width: 60px;
-  height: 60px;
-  margin-bottom: 10px;
-  margin-right: 10px;
+  width: 54px;
+  height: 54px;
+  margin: 0 4px;
+  background-color: #121213;
+  border: 2px solid #3a3a3c;
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 700;
   text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-  color: #000;
-}
-.input-letra:focus {
+  text-transform: uppercase;
+  border-radius: 6px;
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  caret-color: transparent;
+  transition: border-color 0.2s, transform 0.1s;
+}
+
+.input-letra:focus {
+  border-color: #565758;
+  transform: scale(1.05);
+}
+
+.input-letra::selection {
+  background: transparent;
 }
 </style>
+  
