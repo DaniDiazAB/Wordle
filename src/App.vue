@@ -47,7 +47,7 @@ onMounted(() => {
 });
 
 document.addEventListener("keydown", function (event) {
-  if (event.key === "Enter") {
+  if (event.key === "Enter" && vidas.value > 0) {
     probarSuerte();
   }
 });
@@ -73,16 +73,10 @@ function probarSuerte() {
     limpiarPalabra(item.palabra_wordle_palabra).toUpperCase() === limpiarPalabra(palabraUsuarioAdivinar).toUpperCase()
   );
 
-  if (!isPalabraCompleta) {
+  if (!isPalabraCompleta || !palabraEnDiccionario) {
     mostrarError()
     return
   }
-
-  if (!palabraEnDiccionario) {
-    mostrarError()
-    return
-  }
-
 
   actualizarEstadoJuego(palabraUsuarioAdivinar);
 }
@@ -120,7 +114,7 @@ function actualizarEstadoJuego(palabraUsuarioAdivinar: string) {
 function comprobarPalabra(palabraUsuarioEscrita: string) {
   if (limpiarPalabra(palabraUsuarioEscrita).toLowerCase() === palabraLimpia.value?.toLowerCase()) {
     palabraAcertada.value = true
-    vidas.value = 0
+    vidas.value = -1
   } else {
     intentosFallidos.value.push(palabraUsuarioEscrita)
   }
@@ -183,7 +177,6 @@ function mostrarError() {
     <div v-if="!appReady" class="loading">
       <p>Cargando palabra...</p>
     </div>
-
 
     <div v-else-if="palabraAcertada || vidas === 0" class="acertado">
       <h2 v-if="vidas != 0">🎉 ¡Palabra acertada!</h2>
