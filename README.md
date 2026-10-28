@@ -3,7 +3,7 @@
 Este es un proyecto personal desarrollado con **Vue.js v3.5.22**, inspirado en el clásico juego **Wordle**.  
 El objetivo principal ha sido **aprender y practicar el funcionamiento interno de Vue**, sus componentes, reactividad y comunicación entre ellos.
 
-LIVE DEMO: https://danidiaz.site/wordle/index.html
+LIVE DEMO: https://danidiaz.eu/wordle/
 
 ---
 
